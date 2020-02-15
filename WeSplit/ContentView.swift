@@ -15,28 +15,29 @@ struct ContentView: View {
     
     let tipPercentages = [10, 15, 20, 25, 0]
     
-    var totalPerPerson: Double {
-        let peopleCount = Double(numberOfPeople + 2)
+    var totalPerPerson: [Double] {
+        let peopleCount = Double(numberOfPeople)
         let tipSelection = Double(tipPercentages[tipPercentage])
         let orderAmount = Double(checkAmount) ?? 0
         let tipValue = orderAmount / 100 * tipSelection
         let grandTotal = orderAmount + tipValue
         let amountPerPerson = grandTotal / peopleCount
-
-        return amountPerPerson
+        let amountPerPersonWithoutTips = orderAmount / peopleCount
+        let tipPerPerson = tipValue / peopleCount
+        let values = [amountPerPerson, tipValue, amountPerPerson,amountPerPersonWithoutTips,tipPerPerson]
+        return values
     }
     
     var body: some View {
         NavigationView{
             Form {
-                Section {
+                Section(header: Text("How much is the bill?")) {
                     TextField("Amount", text: $checkAmount)
                         .keyboardType(.decimalPad)
-                    Picker("Number of people", selection: $numberOfPeople) {
-                        ForEach(2 ..< 100) {
-                            Text("\($0) people")
-                        }
-                    }
+                }
+                Section(header: Text("How many people will share?")) {
+                    TextField("Number of people", value: $numberOfPeople,formatter: NumberFormatter())
+                        .keyboardType(.numberPad)
                 }
                 Section(header: Text("How much tips you are leave?")) {
                     Picker("Tip percentage", selection: $tipPercentage) {
@@ -45,8 +46,13 @@ struct ContentView: View {
                         }
                     }.pickerStyle(SegmentedPickerStyle())
                 }
-                Section {
-                    Text("$\(totalPerPerson, specifier: "%.2f")")
+                Section (header: Text("Amount per person")) {
+                    Text("$\(totalPerPerson[0], specifier: "%.2f")")
+                }
+                Section (header: Text("Descriptive values")) {
+                    Text("Total per person without tip $\(totalPerPerson[3], specifier: "%.2f")")
+                    Text("Collective tip $\(totalPerPerson[1], specifier: "%.2f")")
+                    Text("Individual tip $\(totalPerPerson[4], specifier: "%.2f")")
                 }
             }
             .navigationBarTitle("WeSplit")
